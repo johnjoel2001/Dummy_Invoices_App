@@ -29,11 +29,22 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
 }
 
 // Serve static files from dist folder (frontend)
-app.use(express.static(path.join(__dirname, '../dist')));
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
 
-// Serve frontend for all other routes (SPA routing) - MUST BE LAST
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+// Root route
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <body style="font-family: system-ui; padding: 40px; text-align: center;">
+        <h1>🤖 Telegram Bot Server</h1>
+        <p>Bot is running successfully!</p>
+        <p>Send messages to your Telegram bot to record payments.</p>
+        <hr style="margin: 40px 0;">
+        <p><a href="/health">Check Health Status</a></p>
+      </body>
+    </html>
+  `);
 });
 
 // Start the bot
