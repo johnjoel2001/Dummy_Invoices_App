@@ -15,21 +15,23 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from dist folder (frontend)
-app.use(express.static(path.join(__dirname, '../dist')));
-
-// Health check endpoint
+// Health check endpoint (must be before static files)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Payment bot server is running' });
 });
 
 // Webhook endpoint for Telegram (optional, for production)
-app.post(`/webhook/${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
-  bot.handleUpdate(req.body);
-  res.sendStatus(200);
-});
+if (process.env.TELEGRAM_BOT_TOKEN) {
+  app.post(`/webhook/${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
+    bot.handleUpdate(req.body);
+    res.sendStatus(200);
+  });
+}
 
-// Serve frontend for all other routes (SPA routing)
+// Serve static files from dist folder (frontend)
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Serve frontend for all other routes (SPA routing) - MUST BE LAST
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
