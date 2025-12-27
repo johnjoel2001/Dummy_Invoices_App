@@ -1,0 +1,45 @@
+# Railway Ignore File
+# Files and directories to exclude from deployment
+
+# Development files
+.env.local
+.env.development
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (optional - remove if you want docs deployed)
+README.md
+TELEGRAM_BOT_SETUP.md
+SUPABASE_SETUP.md
+
+# Build artifacts (if building on Railway)
+dist/
+build/
+
+# Test files
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+__tests__/
+
+# Temporary files
+tmp/
+temp/
