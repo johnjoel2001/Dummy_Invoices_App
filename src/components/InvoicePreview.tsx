@@ -80,8 +80,15 @@ const InvoicePreview = ({ invoiceData }: InvoicePreviewProps) => {
           <div className="space-y-2">
             <div className="flex justify-between py-2 border-b border-gray-300">
               <span className="text-gray-700">Subtotal</span>
-              <span className="text-gray-900 font-semibold">₹{invoiceData.total.toFixed(2)}</span>
+              <span className="text-gray-900 font-semibold">₹{invoiceData.items.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}</span>
             </div>
+            
+            {invoiceData.shippingFee && invoiceData.shippingFee > 0 && (
+              <div className="flex justify-between py-2 border-b border-gray-300">
+                <span className="text-gray-700">Shipping Fee</span>
+                <span className="text-gray-900 font-semibold">₹{invoiceData.shippingFee.toFixed(2)}</span>
+              </div>
+            )}
             
             {invoiceData.payments && invoiceData.payments.length > 0 && (
               <>

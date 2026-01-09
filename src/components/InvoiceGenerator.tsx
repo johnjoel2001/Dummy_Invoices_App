@@ -30,6 +30,7 @@ const InvoiceGenerator = () => {
         amount: 0
       }
     ],
+    shippingFee: undefined,
     total: 0,
     payments: [],
     amountPaid: 0,

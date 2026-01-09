@@ -41,6 +41,7 @@ export interface InvoiceData {
   items: InvoiceItem[];
   
   // Totals
+  shippingFee?: number;
   total: number;
   
   // Payment tracking

@@ -143,13 +143,13 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
     }
     const items = [...invoiceData.items, newItem]
     updateField('items', items)
-    calculateTotals(items)
+    calculateTotals(items, invoiceData.shippingFee)
   }
 
   const removeItem = (id: string) => {
     const items = invoiceData.items.filter(item => item.id !== id)
     updateField('items', items)
-    calculateTotals(items)
+    calculateTotals(items, invoiceData.shippingFee)
   }
 
   const updateItem = (id: string, field: keyof InvoiceItem, value: any) => {
@@ -164,11 +164,12 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
       return item
     })
     updateField('items', items)
-    calculateTotals(items)
+    calculateTotals(items, invoiceData.shippingFee)
   }
 
-  const calculateTotals = (items: InvoiceItem[]) => {
-    const total = items.reduce((sum, item) => sum + item.amount, 0)
+  const calculateTotals = (items: InvoiceItem[], shippingFee?: number) => {
+    const itemsTotal = items.reduce((sum, item) => sum + item.amount, 0)
+    const total = itemsTotal + (shippingFee || 0)
     const amountPaid = invoiceData.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0
     const balance = total - amountPaid
     const paymentStatus: 'Unpaid' | 'Partial' | 'Paid' = 
@@ -177,6 +178,7 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
     setInvoiceData({
       ...invoiceData,
       items,
+      shippingFee,
       total,
       amountPaid,
       balance,
@@ -433,9 +435,33 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
       {/* Totals */}
       <div className="flex justify-end">
         <div className="w-full md:w-1/2">
-          <div className="flex justify-between items-center pt-3 border-t-2 border-gray-300">
-            <span className="text-lg font-bold text-gray-800">Total:</span>
-            <span className="text-lg font-bold text-indigo-600">₹{invoiceData.total.toFixed(2)}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pt-3 border-t border-gray-300">
+              <span className="text-base text-gray-700">Subtotal:</span>
+              <span className="text-base text-gray-800">₹{invoiceData.items.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}</span>
+            </div>
+            
+            {/* Shipping Fee Input */}
+            <div className="flex justify-between items-center gap-4">
+              <label className="text-base text-gray-700">Shipping Fee (Optional):</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={invoiceData.shippingFee || ''}
+                onChange={(e) => {
+                  const shippingFee = e.target.value ? parseFloat(e.target.value) : undefined
+                  calculateTotals(invoiceData.items, shippingFee)
+                }}
+                className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-right"
+              />
+            </div>
+            
+            <div className="flex justify-between items-center pt-3 border-t-2 border-gray-300">
+              <span className="text-lg font-bold text-gray-800">Total:</span>
+              <span className="text-lg font-bold text-indigo-600">₹{invoiceData.total.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>

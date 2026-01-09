@@ -162,13 +162,16 @@ export const generatePDF = (invoiceData: InvoiceData) => {
   y += 15
   const totalBoxX = pageWidth - 90
   
+  // Calculate items subtotal
+  const itemsSubtotal = invoiceData.items.reduce((sum, item) => sum + item.amount, 0)
+  
   // Subtotal
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(0, 0, 0)
   doc.text('Subtotal', totalBoxX, y)
   doc.setFont('helvetica', 'bold')
-  doc.text(`Rs.${invoiceData.total.toFixed(2)}`, pageWidth - margin, y, { align: 'right' })
+  doc.text(`Rs.${itemsSubtotal.toFixed(2)}`, pageWidth - margin, y, { align: 'right' })
   
   // Light separator
   y += 4
@@ -177,6 +180,23 @@ export const generatePDF = (invoiceData: InvoiceData) => {
   doc.line(totalBoxX, y, pageWidth - margin, y)
   
   y += 10
+  
+  // Shipping Fee (if present)
+  if (invoiceData.shippingFee && invoiceData.shippingFee > 0) {
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Shipping Fee', totalBoxX, y)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Rs.${invoiceData.shippingFee.toFixed(2)}`, pageWidth - margin, y, { align: 'right' })
+    
+    // Light separator
+    y += 4
+    doc.setLineWidth(0.5)
+    doc.setDrawColor(180, 180, 180)
+    doc.line(totalBoxX, y, pageWidth - margin, y)
+    
+    y += 10
+  }
   
   // Total Amount (bold and larger)
   doc.setFontSize(12)
