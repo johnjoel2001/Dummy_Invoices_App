@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { InvoiceData } from '../types/invoice'
 import { getInvoices, deleteInvoice } from '../utils/invoiceStorage'
-import { FileText, Trash2, Eye, Calendar, User, DollarSign, Filter } from 'lucide-react'
+import { FileText, Trash2, Eye, Calendar, User, Filter } from 'lucide-react'
 
 interface InvoicesListProps {
   onViewInvoice: (invoice: InvoiceData) => void
@@ -147,7 +147,6 @@ const InvoicesList = ({ onViewInvoice }: InvoicesListProps) => {
                       <span>{new Date(invoice.invoiceDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <DollarSign className="w-4 h-4" />
                       <span className="font-semibold">₹{invoice.total.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">

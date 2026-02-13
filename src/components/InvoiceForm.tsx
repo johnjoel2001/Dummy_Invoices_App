@@ -1,20 +1,32 @@
 import { useState, useEffect } from 'react'
 import { InvoiceData, InvoiceItem, Customer, Payment } from '../types/invoice'
-import { Plus, Trash2, UserPlus, Users, DollarSign, Trash, Edit2 } from 'lucide-react'
+import { Plus, Trash2, UserPlus, Users, DollarSign, Trash, Settings } from 'lucide-react'
 import { getCustomers, saveCustomer, deleteCustomer } from '../utils/customerStorage'
 import { getInvoicesSync } from '../utils/invoiceStorage'
 import CustomerModal from './CustomerModal'
 import PaymentModal from './PaymentModal'
+import CustomerSearchDropdown from './CustomerSearchDropdown'
+import ManageCustomersModal from './ManageCustomersModal'
 
 interface InvoiceFormProps {
   invoiceData: InvoiceData
   setInvoiceData: (data: InvoiceData) => void
 }
 
+// Format customer name to Title Case
+const formatCustomerName = (name: string) => {
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [showCustomerModal, setShowCustomerModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showManageCustomersModal, setShowManageCustomersModal] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
 
@@ -292,67 +304,41 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
       <div>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-semibold text-gray-800">Bill To (Customer)</h3>
-          <button
-            onClick={() => setShowCustomerModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
-          >
-            <UserPlus className="w-4 h-4" />
-            Add New Customer
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowManageCustomersModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+            >
+              <Settings className="w-4 h-4" />
+              Manage Customers
+            </button>
+            <button
+              onClick={() => setShowCustomerModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add New
+            </button>
+          </div>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer</label>
-          <div className="flex gap-2">
-            <select
-              value={selectedCustomerId}
-              onChange={(e) => handleCustomerSelect(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="">-- Select a customer --</option>
-              {customers.map(customer => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Select Customer</label>
+          <CustomerSearchDropdown
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            onSelect={handleCustomerSelect}
+            placeholder="Type to search customers..."
+          />
         </div>
 
-        {/* Customer Management Buttons */}
-        {customers.length > 0 && (
-          <div className="mb-4 bg-gray-50 rounded-md p-3">
-            <p className="text-xs text-gray-600 mb-2 font-medium">Manage Customers:</p>
-            <div className="flex flex-wrap gap-2">
-              {customers.map(customer => (
-                <div key={customer.id} className="flex items-center gap-1 bg-white border border-gray-200 rounded px-2 py-1">
-                  <span className="text-sm text-gray-700">{customer.name}</span>
-                  <button
-                    onClick={() => handleEditCustomer(customer)}
-                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                    title="Edit customer"
-                  >
-                    <Edit2 className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCustomer(customer.id)}
-                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                    title="Delete customer"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Customer Details - Show only when customer is selected */}
         {selectedCustomerId && invoiceData.buyerName ? (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
             <h4 className="font-semibold text-gray-800 mb-2">Selected Customer:</h4>
             <div className="text-sm text-gray-700 space-y-1">
-              <p className="font-medium text-base">{invoiceData.buyerName}</p>
+              <p className="font-medium text-base">{formatCustomerName(invoiceData.buyerName)}</p>
               <p className="whitespace-pre-line">{invoiceData.buyerAddress}</p>
               <p>Phone: {invoiceData.buyerPhone}</p>
               {invoiceData.buyerEmail && <p>Email: {invoiceData.buyerEmail}</p>}
@@ -601,6 +587,19 @@ const InvoiceForm = ({ invoiceData, setInvoiceData }: InvoiceFormProps) => {
         onSave={handleAddPayment}
         maxAmount={invoiceData.balance || invoiceData.total}
       />
+
+      {/* Manage Customers Modal */}
+      {showManageCustomersModal && (
+        <ManageCustomersModal
+          customers={customers}
+          onClose={() => setShowManageCustomersModal(false)}
+          onEdit={(customer) => {
+            setShowManageCustomersModal(false)
+            handleEditCustomer(customer)
+          }}
+          onDelete={handleDeleteCustomer}
+        />
+      )}
     </div>
   )
 }
